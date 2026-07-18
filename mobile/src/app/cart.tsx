@@ -79,7 +79,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     paddingHorizontal: 20,
-    paddingTop: 10,
+    paddingTop: 45,
     paddingBottom: 16,
     backgroundColor: '#fff',
     borderBottomWidth: 1,
@@ -119,7 +119,7 @@ const styles = StyleSheet.create({
   qtyButtonText: { fontSize: 16, fontWeight: '700', color: '#4F46E5' },
   qtyText: { marginHorizontal: 10, fontSize: 15, fontWeight: '600' },
   footer: {
-    padding: 20,
+    padding: 40,
     borderTopWidth: 1,
     borderTopColor: '#eee',
     backgroundColor: '#fff',
@@ -133,7 +133,7 @@ const styles = StyleSheet.create({
   totalValue: { fontSize: 20, fontWeight: '700', color: '#1A1A1A' },
   checkoutButton: {
     backgroundColor: '#4F46E5',
-    paddingVertical: 14,
+    paddingVertical: 15,
     borderRadius: 10,
     alignItems: 'center',
   },
