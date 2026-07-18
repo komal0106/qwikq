@@ -1,98 +1,205 @@
-import * as Device from 'expo-device';
-import { Platform, StyleSheet } from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
+import { StatusBar } from 'expo-status-bar';
+import { useState } from 'react';
+import {
+  FlatList,
+  Image,
+  SafeAreaView,
+  StyleSheet,
+  Text,
+  TouchableOpacity,
+  View,
+} from 'react-native';
 
-import { AnimatedIcon } from '@/components/animated-icon';
-import { HintRow } from '@/components/hint-row';
-import { ThemedText } from '@/components/themed-text';
-import { ThemedView } from '@/components/themed-view';
-import { WebBadge } from '@/components/web-badge';
-import { BottomTabInset, MaxContentWidth, Spacing } from '@/constants/theme';
+// Dummy menu data — we'll replace this with real backend data later
+const MENU_ITEMS = [
+  {
+    id: '1',
+    name: 'Veg Puff',
+    price: 20,
+    category: 'Snacks',
+    image: 'https://images.unsplash.com/photo-1601050690597-df0568f70950?w=300',
+  },
+  {
+    id: '2',
+    name: 'Masala Dosa',
+    price: 45,
+    category: 'Breakfast',
+    image: 'https://images.unsplash.com/photo-1668236543090-82eba5ee5976?w=300',
+  },
+  {
+    id: '3',
+    name: 'Veg Biryani',
+    price: 80,
+    category: 'Lunch',
+    image: 'https://images.unsplash.com/photo-1563379091339-03b21ab4a4f8?w=300',
+  },
+  {
+    id: '4',
+    name: 'Cold Coffee',
+    price: 35,
+    category: 'Beverages',
+    image: 'https://images.unsplash.com/photo-1461023058943-07fcbe16d735?w=300',
+  },
+  {
+    id: '5',
+    name: 'Samosa',
+    price: 15,
+    category: 'Snacks',
+    image: 'https://images.unsplash.com/photo-1601050690597-df0568f70950?w=300',
+  },
+];
 
-function getDevMenuHint() {
-  if (Platform.OS === 'web') {
-    return <ThemedText type="small">use browser devtools</ThemedText>;
-  }
-  if (Device.isDevice) {
-    return (
-      <ThemedText type="small">
-        shake device or press <ThemedText type="code">m</ThemedText> in terminal
-      </ThemedText>
-    );
-  }
-  const shortcut = Platform.OS === 'android' ? 'cmd+m (or ctrl+m)' : 'cmd+d';
-  return (
-    <ThemedText type="small">
-      press <ThemedText type="code">{shortcut}</ThemedText>
-    </ThemedText>
+export default function MenuScreen() {
+  const [cart, setCart] = useState<string[]>([]);
+
+  const addToCart = (id: string) => {
+    setCart([...cart, id]);
+  };
+
+  const renderItem = ({ item }: { item: (typeof MENU_ITEMS)[0] }) => (
+    <View style={styles.card}>
+      <Image source={{ uri: item.image }} style={styles.image} />
+      <View style={styles.details}>
+        <Text style={styles.category}>{item.category}</Text>
+        <Text style={styles.name}>{item.name}</Text>
+        <Text style={styles.price}>₹{item.price}</Text>
+      </View>
+      <TouchableOpacity style={styles.addButton} onPress={() => addToCart(item.id)}>
+        <Text style={styles.addButtonText}>Add</Text>
+      </TouchableOpacity>
+    </View>
   );
-}
 
-export default function HomeScreen() {
   return (
-    <ThemedView style={styles.container}>
-      <SafeAreaView style={styles.safeArea}>
-        <ThemedView style={styles.heroSection}>
-          <AnimatedIcon />
-          <ThemedText type="title" style={styles.title}>
-            Welcome to&nbsp;Expo
-          </ThemedText>
-        </ThemedView>
+    <SafeAreaView style={styles.container}>
+      <StatusBar style="dark" />
+      <View style={styles.header}>
+        <Text style={styles.headerTitle}>QwikQ</Text>
+        <Text style={styles.headerSubtitle}>Campus Canteen Menu</Text>
+      </View>
 
-        <ThemedText type="code" style={styles.code}>
-          get started
-        </ThemedText>
+      <FlatList
+        data={MENU_ITEMS}
+        keyExtractor={(item) => item.id}
+        renderItem={renderItem}
+        contentContainerStyle={styles.list}
+      />
 
-        <ThemedView type="backgroundElement" style={styles.stepContainer}>
-          <HintRow
-            title="Try editing"
-            hint={<ThemedText type="code">src/app/index.tsx</ThemedText>}
-          />
-          <HintRow title="Dev tools" hint={getDevMenuHint()} />
-          <HintRow
-            title="Fresh start"
-            hint={<ThemedText type="code">npm run reset-project</ThemedText>}
-          />
-        </ThemedView>
-
-        {Platform.OS === 'web' && <WebBadge />}
-      </SafeAreaView>
-    </ThemedView>
+      {cart.length > 0 && (
+        <View style={styles.cartBar}>
+          <Text style={styles.cartText}>{cart.length} item(s) in cart</Text>
+          <TouchableOpacity style={styles.cartButton}>
+            <Text style={styles.cartButtonText}>View Cart</Text>
+          </TouchableOpacity>
+        </View>
+      )}
+    </SafeAreaView>
   );
 }
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    justifyContent: 'center',
+    backgroundColor: '#F8F9FB',
+  },
+  header: {
+    paddingHorizontal: 20,
+    paddingTop: 10,
+    paddingBottom: 16,
+    backgroundColor: '#fff',
+    borderBottomWidth: 1,
+    borderBottomColor: '#eee',
+  },
+  headerTitle: {
+    fontSize: 26,
+    fontWeight: '700',
+    color: '#1A1A1A',
+  },
+  headerSubtitle: {
+    fontSize: 14,
+    color: '#888',
+    marginTop: 2,
+  },
+  list: {
+    padding: 16,
+    paddingBottom: 100,
+  },
+  card: {
     flexDirection: 'row',
-  },
-  safeArea: {
-    flex: 1,
-    paddingHorizontal: Spacing.four,
+    backgroundColor: '#fff',
+    borderRadius: 14,
+    marginBottom: 14,
+    padding: 12,
     alignItems: 'center',
-    gap: Spacing.three,
-    paddingBottom: BottomTabInset + Spacing.three,
-    maxWidth: MaxContentWidth,
+    shadowColor: '#000',
+    shadowOpacity: 0.06,
+    shadowRadius: 6,
+    shadowOffset: { width: 0, height: 2 },
+    elevation: 2,
   },
-  heroSection: {
-    alignItems: 'center',
-    justifyContent: 'center',
+  image: {
+    width: 64,
+    height: 64,
+    borderRadius: 10,
+    backgroundColor: '#eee',
+  },
+  details: {
     flex: 1,
-    paddingHorizontal: Spacing.four,
-    gap: Spacing.four,
+    marginLeft: 14,
   },
-  title: {
-    textAlign: 'center',
-  },
-  code: {
+  category: {
+    fontSize: 12,
+    color: '#999',
     textTransform: 'uppercase',
   },
-  stepContainer: {
-    gap: Spacing.three,
-    alignSelf: 'stretch',
-    paddingHorizontal: Spacing.three,
-    paddingVertical: Spacing.four,
-    borderRadius: Spacing.four,
+  name: {
+    fontSize: 16,
+    fontWeight: '600',
+    color: '#1A1A1A',
+    marginTop: 2,
+  },
+  price: {
+    fontSize: 15,
+    color: '#2E7D32',
+    fontWeight: '600',
+    marginTop: 4,
+  },
+  addButton: {
+    backgroundColor: '#4F46E5',
+    paddingHorizontal: 16,
+    paddingVertical: 8,
+    borderRadius: 8,
+  },
+  addButtonText: {
+    color: '#fff',
+    fontWeight: '600',
+    fontSize: 13,
+  },
+  cartBar: {
+    position: 'absolute',
+    bottom: 0,
+    left: 0,
+    right: 0,
+    backgroundColor: '#4F46E5',
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    paddingHorizontal: 20,
+    paddingVertical: 16,
+  },
+  cartText: {
+    color: '#fff',
+    fontWeight: '600',
+    fontSize: 15,
+  },
+  cartButton: {
+    backgroundColor: '#fff',
+    paddingHorizontal: 16,
+    paddingVertical: 8,
+    borderRadius: 8,
+  },
+  cartButtonText: {
+    color: '#4F46E5',
+    fontWeight: '700',
   },
 });
