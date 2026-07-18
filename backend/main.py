@@ -1,12 +1,16 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
+from database import engine, Base
+import models
+
+# Creates the table in the database if it doesn't exist yet
+Base.metadata.create_all(bind=engine)
 
 app = FastAPI(title="QwikQ API")
 
-# Allow requests from your mobile app / web dashboard during development
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],  # In production, restrict this to your actual app domains
+    allow_origins=["*"],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
