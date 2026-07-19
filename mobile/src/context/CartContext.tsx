@@ -1,7 +1,7 @@
 import { createContext, ReactNode, useContext, useState } from 'react';
 
 export type MenuItem = {
-  id: string;
+  id: number;
   name: string;
   price: number;
   category: string;
@@ -36,7 +36,7 @@ export function CartProvider({ children }: { children: ReactNode }) {
     });
   };
 
-  const removeFromCart = (id: string) => {
+  const removeFromCart = (id: number) => {
     setCartItems((prev) => {
       const existing = prev.find((i) => i.id === id);
       if (existing && existing.quantity > 1) {

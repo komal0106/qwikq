@@ -1,7 +1,9 @@
 import { MenuItem, useCart } from '@/context/CartContext';
 import { router } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
+import { useEffect, useState } from 'react';
 import {
+  ActivityIndicator,
   FlatList,
   Image,
   SafeAreaView,
@@ -11,47 +13,33 @@ import {
   View,
 } from 'react-native';
 
-
-const MENU_ITEMS: MenuItem[] = [
-  {
-    id: '1',
-    name: 'Veg Puff',
-    price: 30,
-    category: 'Snacks',
-    image: 'https://images.unsplash.com/photo-1601050690597-df0568f70950?w=300',
-  },
-  {
-    id: '2',
-    name: 'Masala Dosa',
-    price: 70,
-    category: 'Breakfast',
-    image: 'https://images.unsplash.com/photo-1668236543090-82eba5ee5976?w=300',
-  },
-  {
-    id: '3',
-    name: 'Veg Biryani',
-    price: 100,
-    category: 'Lunch',
-    image: 'https://images.unsplash.com/photo-1563379091339-03b21ab4a4f8?w=300',
-  },
-  {
-    id: '4',
-    name: 'Cold Coffee',
-    price: 50,
-    category: 'Beverages',
-    image: 'https://images.unsplash.com/photo-1461023058943-07fcbe16d735?w=300',
-  },
-  {
-    id: '5',
-    name: 'Samosa',
-    price: 30,
-    category: 'Snacks',
-    image: 'https://images.unsplash.com/photo-1601050690597-df0568f70950?w=300',
-  },
-];
+// IMPORTANT: Replace with YOUR laptop's IP address (same one shown in Expo QR code)
+const API_URL = 'http://192.168.0.195:8000';
 
 export default function MenuScreen() {
   const { addToCart, totalItems, totalPrice } = useCart();
+  const [menuItems, setMenuItems] = useState<MenuItem[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    fetchMenu();
+  }, []);
+
+  const fetchMenu = async () => {
+    try {
+      setLoading(true);
+      const response = await fetch(`${API_URL}/menu`);
+      const data = await response.json();
+      setMenuItems(data);
+      setError(null);
+    } catch (err) {
+      console.error('Failed to fetch menu:', err);
+      setError('Could not load menu. Check your connection.');
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const renderItem = ({ item }: { item: MenuItem }) => (
     <View style={styles.card}>
@@ -75,20 +63,31 @@ export default function MenuScreen() {
         <Text style={styles.headerSubtitle}>Campus Canteen Menu</Text>
       </View>
 
-      <FlatList
-        data={MENU_ITEMS}
-        keyExtractor={(item) => item.id}
-        renderItem={renderItem}
-        contentContainerStyle={styles.list}
-      />
+      {loading ? (
+        <View style={styles.centerBox}>
+          <ActivityIndicator size="large" color="#4F46E5" />
+          <Text style={styles.loadingText}>Loading menu...</Text>
+        </View>
+      ) : error ? (
+        <View style={styles.centerBox}>
+          <Text style={styles.errorText}>{error}</Text>
+          <TouchableOpacity style={styles.retryButton} onPress={fetchMenu}>
+            <Text style={styles.retryButtonText}>Retry</Text>
+          </TouchableOpacity>
+        </View>
+      ) : (
+        <FlatList
+          data={menuItems}
+          keyExtractor={(item) => item.id}
+          renderItem={renderItem}
+          contentContainerStyle={styles.list}
+        />
+      )}
 
       {totalItems > 0 && (
         <TouchableOpacity
           style={styles.cartBar}
-        onPress={() => {
-      console.log('Navigating to cart...');
-      router.push('/cart');
-    }}
+          onPress={() => router.push('/cart')}
         >
           <Text style={styles.cartText}>
             {totalItems} item(s) · ₹{totalPrice}
@@ -112,6 +111,16 @@ const styles = StyleSheet.create({
   },
   headerTitle: { fontSize: 26, fontWeight: '700', color: '#1A1A1A' },
   headerSubtitle: { fontSize: 14, color: '#888', marginTop: 2 },
+  centerBox: { flex: 1, justifyContent: 'center', alignItems: 'center', gap: 12 },
+  loadingText: { color: '#888', fontSize: 14 },
+  errorText: { color: '#D32F2F', fontSize: 14, textAlign: 'center', paddingHorizontal: 30 },
+  retryButton: {
+    backgroundColor: '#4F46E5',
+    paddingHorizontal: 20,
+    paddingVertical: 10,
+    borderRadius: 8,
+  },
+  retryButtonText: { color: '#fff', fontWeight: '600' },
   list: { padding: 16, paddingBottom: 100 },
   card: {
     flexDirection: 'row',
@@ -138,18 +147,18 @@ const styles = StyleSheet.create({
     borderRadius: 8,
   },
   addButtonText: { color: '#fff', fontWeight: '600', fontSize: 13 },
- cartBar: {
-  position: 'absolute',
-  bottom: 130,
-  left: 0,
-  right: 0,
-  backgroundColor: '#4F46E5',
-  flexDirection: 'row',
-  justifyContent: 'space-between',
-  alignItems: 'center',
-  paddingHorizontal: 20,
-  paddingVertical: 16,
-},
+  cartBar: {
+    position: 'absolute',
+    bottom: 60,
+    left: 0,
+    right: 0,
+    backgroundColor: '#4F46E5',
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    paddingHorizontal: 20,
+    paddingVertical: 16,
+  },
   cartText: { color: '#fff', fontWeight: '600', fontSize: 15 },
   cartButtonText: { color: '#fff', fontWeight: '700' },
 });

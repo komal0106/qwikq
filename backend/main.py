@@ -1,9 +1,12 @@
-from fastapi import FastAPI
+from fastapi import FastAPI, Depends
 from fastapi.middleware.cors import CORSMiddleware
-from database import engine, Base
-import models
+from sqlalchemy.orm import Session
+from typing import List
 
-# Creates the table in the database if it doesn't exist yet
+from database import engine, Base, get_db
+import models
+import schemas
+
 Base.metadata.create_all(bind=engine)
 
 app = FastAPI(title="QwikQ API")
@@ -23,3 +26,15 @@ def root():
 @app.get("/health")
 def health_check():
     return {"status": "ok"}
+
+@app.post("/menu", response_model=schemas.MenuItemResponse)
+def create_menu_item(item: schemas.MenuItemCreate, db: Session = Depends(get_db)):
+    db_item = models.MenuItem(**item.dict())
+    db.add(db_item)
+    db.commit()
+    db.refresh(db_item)
+    return db_item
+
+@app.get("/menu", response_model=List[schemas.MenuItemResponse])
+def get_menu_items(db: Session = Depends(get_db)):
+    return db.query(models.MenuItem).all()
