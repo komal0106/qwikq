@@ -1,13 +1,13 @@
 import { useCart } from '@/context/CartContext';
 import { router } from 'expo-router';
 import {
-    FlatList,
-    Image,
-    SafeAreaView,
-    StyleSheet,
-    Text,
-    TouchableOpacity,
-    View,
+  FlatList,
+  Image,
+  SafeAreaView,
+  StyleSheet,
+  Text,
+  TouchableOpacity,
+  View,
 } from 'react-native';
 
 export default function CartScreen() {
@@ -30,7 +30,7 @@ export default function CartScreen() {
         <>
           <FlatList
             data={cartItems}
-            keyExtractor={(item) => item.id}
+            keyExtractor={(item) => item.id.toString()}
             contentContainerStyle={styles.list}
             renderItem={({ item }) => (
               <View style={styles.card}>
@@ -63,9 +63,12 @@ export default function CartScreen() {
               <Text style={styles.totalLabel}>Total</Text>
               <Text style={styles.totalValue}>₹{totalPrice}</Text>
             </View>
-            <TouchableOpacity style={styles.checkoutButton}>
-              <Text style={styles.checkoutButtonText}>Proceed to Checkout</Text>
-            </TouchableOpacity>
+            <TouchableOpacity
+  style={styles.checkoutButton}
+  onPress={() => router.push('/payment')}
+>
+  <Text style={styles.checkoutButtonText}>Proceed to Checkout</Text>
+</TouchableOpacity>
           </View>
         </>
       )}

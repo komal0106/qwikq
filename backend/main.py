@@ -2,6 +2,7 @@ from fastapi import FastAPI, Depends
 from fastapi.middleware.cors import CORSMiddleware
 from sqlalchemy.orm import Session
 from typing import List
+import uuid
 
 from database import engine, Base, get_db
 import models
@@ -38,3 +39,29 @@ def create_menu_item(item: schemas.MenuItemCreate, db: Session = Depends(get_db)
 @app.get("/menu", response_model=List[schemas.MenuItemResponse])
 def get_menu_items(db: Session = Depends(get_db)):
     return db.query(models.MenuItem).all()
+
+@app.post("/payment/create", response_model=schemas.PaymentResponse)
+def create_payment(payment: schemas.PaymentCreate, db: Session = Depends(get_db)):
+    order_id = f"order_{uuid.uuid4().hex[:12]}"
+    db_payment = models.Payment(
+        order_id=order_id,
+        amount=payment.amount,
+        payment_method=payment.payment_method,
+        status="pending"
+    )
+    db.add(db_payment)
+    db.commit()
+    db.refresh(db_payment)
+    return db_payment
+
+@app.post("/payment/confirm/{order_id}", response_model=schemas.PaymentResponse)
+def confirm_payment(order_id: str, db: Session = Depends(get_db)):
+    db_payment = db.query(models.Payment).filter(models.Payment.order_id == order_id).first()
+    if not db_payment:
+        return {"error": "Payment not found"}
+
+    db_payment.status = "success"
+    db_payment.transaction_id = f"txn_{uuid.uuid4().hex[:16]}"
+    db.commit()
+    db.refresh(db_payment)
+    return db_payment

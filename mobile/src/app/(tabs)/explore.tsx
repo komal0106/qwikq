@@ -32,6 +32,8 @@ export default function TabTwoScreen() {
     },
   });
 
+  const symbolName = Platform.OS === 'ios' ? 'arrow.up.right.square' : 'link';
+
   return (
     <ScrollView
       style={[styles.scrollView, { backgroundColor: theme.background }]}

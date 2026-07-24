@@ -13,7 +13,7 @@ type CartItem = MenuItem & { quantity: number };
 type CartContextType = {
   cartItems: CartItem[];
   addToCart: (item: MenuItem) => void;
-  removeFromCart: (id: string) => void;
+  removeFromCart: (id: number) => void;
   clearCart: () => void;
   totalItems: number;
   totalPrice: number;
