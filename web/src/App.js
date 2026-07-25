@@ -26,6 +26,19 @@ function App() {
     }
   };
 
+  const updateStatus = async (orderId, newStatus) => {
+    try {
+      await fetch(`${API_URL}/orders/${orderId}/status`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ status: newStatus }),
+      });
+      fetchOrders(); // refresh list
+    } catch (err) {
+      console.error('Failed to update status:', err);
+    }
+  };
+
   const statusColor = (status) => {
     switch (status) {
       case 'placed': return '#F59E0B';
@@ -72,6 +85,33 @@ function App() {
 
               <div className="order-total">
                 Total: ₹{order.total_amount}
+              </div>
+
+              <div className="status-buttons">
+                {order.status === 'placed' && (
+                  <button
+                    className="status-btn"
+                    onClick={() => updateStatus(order.order_id, 'preparing')}
+                  >
+                    Start Preparing
+                  </button>
+                )}
+                {order.status === 'preparing' && (
+                  <button
+                    className="status-btn"
+                    onClick={() => updateStatus(order.order_id, 'ready')}
+                  >
+                    Mark Ready
+                  </button>
+                )}
+                {order.status === 'ready' && (
+                  <button
+                    className="status-btn"
+                    onClick={() => updateStatus(order.order_id, 'completed')}
+                  >
+                    Mark Completed
+                  </button>
+                )}
               </div>
             </div>
           ))}

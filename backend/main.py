@@ -95,3 +95,13 @@ def create_order(order: schemas.OrderCreate, db: Session = Depends(get_db)):
 @app.get("/orders", response_model=List[schemas.OrderResponse])
 def get_orders(db: Session = Depends(get_db)):
     return db.query(models.Order).all()
+
+@app.patch("/orders/{order_id}/status", response_model=schemas.OrderResponse)
+def update_order_status(order_id: str, update: schemas.OrderStatusUpdate, db: Session = Depends(get_db)):
+    db_order = db.query(models.Order).filter(models.Order.order_id == order_id).first()
+    if not db_order:
+        return {"error": "Order not found"}
+    db_order.status = update.status
+    db.commit()
+    db.refresh(db_order)
+    return db_order
