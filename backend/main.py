@@ -105,3 +105,13 @@ def update_order_status(order_id: str, update: schemas.OrderStatusUpdate, db: Se
     db.commit()
     db.refresh(db_order)
     return db_order
+
+
+@app.delete("/menu/{item_id}")
+def delete_menu_item(item_id: int, db: Session = Depends(get_db)):
+    db_item = db.query(models.MenuItem).filter(models.MenuItem.id == item_id).first()
+    if not db_item:
+        return {"error": "Item not found"}
+    db.delete(db_item)
+    db.commit()
+    return {"message": "Item deleted"}
