@@ -31,3 +31,33 @@ class PaymentResponse(BaseModel):
 
     class Config:
         from_attributes = True
+
+
+class OrderItemCreate(BaseModel):
+    menu_item_id: int
+    item_name: str
+    quantity: int
+    price: float
+
+class OrderCreate(BaseModel):
+    total_amount: float
+    items: list[OrderItemCreate]
+
+class OrderItemResponse(BaseModel):
+    id: int
+    item_name: str
+    quantity: int
+    price: float
+
+    class Config:
+        from_attributes = True
+
+class OrderResponse(BaseModel):
+    id: int
+    order_id: str
+    total_amount: float
+    status: str
+    items: list[OrderItemResponse]
+
+    class Config:
+        from_attributes = True

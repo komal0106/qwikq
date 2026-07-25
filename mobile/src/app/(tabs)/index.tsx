@@ -15,7 +15,10 @@ import {
 
 // IMPORTANT: Replace with YOUR laptop's IP address (same one shown in Expo QR code)
 //const API_URL = 'http://10.10.18.103:8000';
-const API_URL = 'http://172.16.52.176:8000';
+//const API_URL = 'http://172.16.52.176:8000';
+const API_URL = 'http://10.141.163.206:8000';
+
+
 
 export default function MenuScreen() {
   const { addToCart, totalItems, totalPrice } = useCart();

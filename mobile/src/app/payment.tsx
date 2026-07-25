@@ -10,13 +10,12 @@ import {
   View,
 } from 'react-native';
 
-
-const API_URL = 'http://172.16.52.176:8000';
+const API_URL = 'http://10.141.163.206:8000';
 
 type PaymentMethod = 'UPI' | 'Card';
 
 export default function PaymentScreen() {
-  const { totalPrice, clearCart } = useCart();
+  const { totalPrice, clearCart, cartItems } = useCart();
   const [selectedMethod, setSelectedMethod] = useState<PaymentMethod>('UPI');
   const [processing, setProcessing] = useState(false);
   const [success, setSuccess] = useState(false);
@@ -44,6 +43,21 @@ export default function PaymentScreen() {
         { method: 'POST' }
       );
       await confirmRes.json();
+
+      // Step 3: Create the actual order with items
+      await fetch(`${API_URL}/orders/create`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          total_amount: totalPrice,
+          items: cartItems.map((item) => ({
+            menu_item_id: item.id,
+            item_name: item.name,
+            quantity: item.quantity,
+            price: item.price,
+          })),
+        }),
+      });
 
       setSuccess(true);
       setTimeout(() => {

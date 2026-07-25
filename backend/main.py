@@ -65,3 +65,33 @@ def confirm_payment(order_id: str, db: Session = Depends(get_db)):
     db.commit()
     db.refresh(db_payment)
     return db_payment
+
+
+@app.post("/orders/create", response_model=schemas.OrderResponse)
+def create_order(order: schemas.OrderCreate, db: Session = Depends(get_db)):
+    order_id = f"ord_{uuid.uuid4().hex[:12]}"
+    db_order = models.Order(
+        order_id=order_id,
+        total_amount=order.total_amount,
+        status="placed"
+    )
+    db.add(db_order)
+    db.commit()
+    db.refresh(db_order)
+
+    for item in order.items:
+        db_item = models.OrderItem(
+            order_id=db_order.id,
+            menu_item_id=item.menu_item_id,
+            item_name=item.item_name,
+            quantity=item.quantity,
+            price=item.price,
+        )
+        db.add(db_item)
+    db.commit()
+    db.refresh(db_order)
+    return db_order
+
+@app.get("/orders", response_model=List[schemas.OrderResponse])
+def get_orders(db: Session = Depends(get_db)):
+    return db.query(models.Order).all()
